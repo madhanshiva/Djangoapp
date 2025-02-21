@@ -94,4 +94,26 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            script {
+                emailext (
+                    subject: "Jenkins Build Notification: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: """
+                        <div style="border: 2px solid #007bff; padding: 15px; background-color: #f8f9fa; font-family: Arial, sans-serif; color: #333;">
+                            <h2 style="color: #007bff;">Jenkins Build Notification</h2>
+                            <p><strong>Project:</strong> ${env.JOB_NAME}</p>
+                            <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
+                            <p><strong>Build Status:</strong> <span style="color: ${currentBuild.currentResult == 'SUCCESS' ? 'green' : 'red'};"><strong>${currentBuild.currentResult}</strong></span></p>
+                            <p><strong>Build URL:</strong> <a href="${BUILD_URL}" style="color: #007bff; text-decoration: none;">Console Output</a></p>
+                        </div>
+                    """,
+                    to: "madhanmv580@gmai.com",
+                    from: 'jenkins@example.com',
+                    replyTo: 'jenkins@example.com',
+                    mimeType: 'text/html'
+                )
+            }
+        }
+    }
 }
