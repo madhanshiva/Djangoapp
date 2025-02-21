@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        REPO_URL = 'https://github.com/wamique00786/wesalvatore.git'
-        DOCKER_IMAGE = 'wamique00786/wesalvatore'
+        REPO_URL = 'https://github.com/madhanshiva/Djangoapp.git'
+        DOCKER_IMAGE = 'mvmadhan/wesalvatore'
         CONTAINER_NAME = 'wesalvatore'
         DOCKER_BUILDKIT = '0'
         TIMESTAMP = new Date().format("yyyyMMddHHmmss")
