@@ -42,12 +42,15 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'NVD_KEY', variable: 'NVD_KEY')]) {
-                        dependencyCheck additionalArguments: "--scan . --nvdApiKey ${env.NVD_KEY}",odcInstallation: 'DC',stopBuild: false
+                        dependencyCheck additionalArguments: "--scan . --nvdApiKey=$NVD_KEY",
+                                odcInstallation: 'DC',
+                                stopBuild: false
                     }
                 }
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml' 
             }
         }
+
         
         stage('Docker Build') {
             steps {
