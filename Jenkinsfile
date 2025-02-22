@@ -42,7 +42,6 @@ pipeline {
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
             }
-        }
         stage('Docker Build') {
             steps {
                 script {
