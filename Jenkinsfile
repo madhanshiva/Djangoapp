@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         REPO_URL = 'https://github.com/madhanshiva/Djangoapp.git'
+        SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_IMAGE = 'mvmadhan/wesalvatore'
         CONTAINER_NAME = 'wesalvatore'
         DOCKER_BUILDKIT = '0'
@@ -26,6 +27,20 @@ pipeline {
                     echo "Cloning repository from ${REPO_URL}"
                     git branch: 'main', url: "${REPO_URL}"
                 }
+            }
+        }
+        stage('Quality Check') {
+            steps {
+                withSonarQubeEnv('sonar'){
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=django \
+                    -Dsonar.projectKey=django '''
+                }
+            }
+        }
+        stage('OWASP Scan') {
+            steps {
+                dependencyCheck additionalArguments: '--scan .', odcInstallation: 'DC'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
 
