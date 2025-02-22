@@ -8,50 +8,48 @@ pipeline {
         CONTAINER_NAME = 'wesalvatore'
         DOCKER_BUILDKIT = '0'
         TIMESTAMP = new Date().format("yyyyMMddHHmmss")
-        
+
         // Database connection details (for the app to connect)
-        
         DATABASE_HOST = credentials('DATABASE_HOST')
         DATABASE_USER = credentials('DATABASE_USER')
         DATABASE_PASSWORD = credentials('DATABASE_PASSWORD')
         DATABASE_NAME = credentials('DATABASE_NAME')
         SECRET_KEY = credentials('SECRET_KEY')
-        
-        // Django secret key
     }
 
     stages {
         stage('Git Clone') {
             steps {
                 script {
-                    // Clone the repository
                     echo "Cloning repository from ${REPO_URL}"
                     git branch: 'main', url: "${REPO_URL}"
                 }
             }
         }
+
         stage('Quality Check') {
             steps {
-                withSonarQubeEnv('sonar'){
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=django \
-                    -Dsonar.projectKey=django '''
+                withSonarQubeEnv('sonar') {
+                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=django \
+                    -Dsonar.projectKey=django \
+                    -Dsonar.python.version=3.10'''
                 }
             }
         }
+
         stage('OWASP Scan') {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'NVD_KEY', variable: 'NVD_KEY')]) {
-                        dependencyCheck additionalArguments: "--scan . --nvdApiKey=$NVD_KEY",
+                        dependencyCheck additionalArguments: "--scan . --format XML --out dependency-check-report.xml --nvdApiKey=$NVD_KEY",
                                 odcInstallation: 'DC',
                                 stopBuild: false
                     }
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml' 
             }
         }
 
-        
         stage('Docker Build') {
             steps {
                 script {
@@ -94,7 +92,6 @@ pipeline {
                         echo 'Network already exists. Skipping creation...'
                     fi
 
-                    # Check if the app container exists and remove it
                     if [ "$(docker ps -a -q -f name=${CONTAINER_NAME})" ]; then
                         echo 'Stopping and removing existing app container...'
                         docker stop ${CONTAINER_NAME} || true
@@ -117,6 +114,7 @@ pipeline {
             }
         }
     }
+
     post {
         always {
             script {
@@ -131,7 +129,7 @@ pipeline {
                             <p><strong>Build URL:</strong> <a href="${BUILD_URL}" style="color: #007bff; text-decoration: none;">Console Output</a></p>
                         </div>
                     """,
-                    to: "madhanmv580@gmai.com",
+                    to: "madhanmv580@gmail.com",
                     from: 'jenkins@example.com',
                     replyTo: 'jenkins@example.com',
                     mimeType: 'text/html'
