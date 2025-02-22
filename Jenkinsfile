@@ -36,12 +36,11 @@ pipeline {
                 }
             }
         }
-
         stage('OWASP Scan') {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'NVD_KEY', variable: 'NVD_KEY')]) {
-                        dependencyCheck additionalArguments: "--scan . --format XML --out dependency-check-report.xml --nvdApiKey=$NVD_KEY",
+                        dependencyCheck additionalArguments: "--scan . --format XML --out dependency-check-report.xml --nvdApiKey=${NVD_KEY}",
                                 odcInstallation: 'DC',
                                 stopBuild: false
                     }
@@ -49,7 +48,6 @@ pipeline {
                 }
             }
         }
-
         stage('Docker Build') {
             steps {
                 script {
