@@ -10,7 +10,7 @@ pipeline {
         TIMESTAMP = new Date().format("yyyyMMddHHmmss")
         
         // Database connection details (for the app to connect)
-        NVD_KEY = credentials('NVD_KEY')
+        
         DATABASE_HOST = credentials('DATABASE_HOST')
         DATABASE_USER = credentials('DATABASE_USER')
         DATABASE_PASSWORD = credentials('DATABASE_PASSWORD')
@@ -40,11 +40,15 @@ pipeline {
         }
         stage('OWASP Scan') {
             steps {
-                dependencyCheck additionalArguments: '--scan . --nvdApiKey ${NVD_KEY}', odcInstallation: 'DC', stopBuild: false
+                script {
+                    withCredentials([string(credentialsId: 'NVD_KEY', variable: 'NVD_KEY')]) {
+                        dependencyCheck additionalArguments: "--scan . --nvdApiKey ${env.NVD_KEY}",odcInstallation: 'DC',stopBuild: false
+                    }
+                }
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
-
+        
         stage('Docker Build') {
             steps {
                 script {
