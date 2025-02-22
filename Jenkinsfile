@@ -40,7 +40,7 @@ pipeline {
         }
         stage('OWASP Scan') {
             steps {
-                dependencyCheck additionalArguments: '--scan . --nvdApiKey ${NVD_KEY}', odcInstallation: 'DC', returnStatus: true
+                dependencyCheck additionalArguments: '--scan . --nvdApiKey ${NVD_KEY}', odcInstallation: 'DC', stopBuild: false
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
